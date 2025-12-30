@@ -1,0 +1,63 @@
+# Todas juntas
+plt.figure(figsize=(20,20))
+
+# Primera figura
+plt.subplot(2,2,1)
+
+ciudades_mas_pobladas = df.loc[df.population_total.nlargest(5).index,["city","population_total"]]
+ciudades = [ separa_nombre(ciudad) for ciudad in ciudades_mas_pobladas["city"].to_list()]
+colores = ["blue","gray","red","olive","brown"]
+
+plt.bar(x= ciudades, height= ciudades_mas_pobladas["population_total"]/1000, color = colores, alpha = 0.5)
+
+plt.ylim([0,5000])
+plt.ylabel("Habitantes (miles)")
+plt.xlabel("Ciudades")
+plt.title("Ciudades más pobladas de California")
+
+ciudades_mas_pobladas.set_index("city", inplace = True)
+for indice, ciudad in enumerate(ciudades_mas_pobladas.index):
+    poblacion = ciudades_mas_pobladas.loc[ciudad,"population_total"]/1000
+    plt.text(ciudades[indice], poblacion + 50, f"{poblacion}", ha = "center")
+
+# Segunda figura
+plt.subplot(2,2,2)
+
+plt.hist(df["area_total_km2"], color = "steelblue", alpha = 0.7, bins = 50, label = "Hist Area")
+
+plt.xlabel("Superficie ($km^2$)", fontdict = dict(family= "Bradley Hand ITC", size = 18))
+plt.ylabel("Número de Ciudades", fontdict= dict(family = "Bradley Hand ITC", size = 18))
+plt.legend()
+
+# Tercera figura
+plt.subplot(2,2,3)
+
+plt.scatter(df["area_water_km2"], df["population_total"]/1000, alpha = 0.5, color = "green")
+
+plt.xlabel("Área de agua en la ciudad ($km^2$)")
+plt.ylabel("Población (miles habitantes)")
+plt.title("Población por kilometro cuadrado de agua")
+
+outlier_1_y = ciudades_mas_pobladas.population_total.max()
+outlier_2_y = ciudades_mas_pobladas.population_total.nlargest(2).iloc[1]
+outlier_1_x = df.loc[df.population_total == outlier_1_y,"area_water_km2"].values[0]
+outlier_2_x = df.loc[df.population_total == outlier_2_y,"area_water_km2"].values[0]
+
+xytext= (60,3500)
+text = "Outliers"
+
+plt.annotate(xy= (outlier_1_x,outlier_1_y/1000), xytext= xytext, text = text, arrowprops= dict(arrowstyle = "->"))
+
+plt.annotate(xy= (outlier_2_x,outlier_2_y/1000), xytext= xytext, text = " " * len(text), arrowprops= dict(arrowstyle = "<->"))
+
+# Cuarta figura
+plt.subplot(2,2,4)
+
+plt.boxplot(df["elevation_m"], vert = False, boxprops = dict(facecolor = "red"), medianprops = dict(color= "black"),
+            patch_artist= True )
+
+plt.xlabel("Altitud (m)")
+plt.title("Diagrama de caja de la Altitud de las ciudades de California")
+plt.yticks([])
+
+plt.show()
